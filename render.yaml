@@ -21,7 +21,7 @@ services:
     plan: free
     runtime: docker
     rootDir: backend
-    dockerfilePath: backend/Dockerfile
+    dockerfilePath: Dockerfile
     envVars:
       - key: PORT
         value: 5000
@@ -50,7 +50,7 @@ services:
     plan: free
     runtime: docker
     rootDir: moltbot
-    dockerfilePath: moltbot/Dockerfile
+    dockerfilePath: Dockerfile
     envVars:
       - key: PORT
         value: 7000
