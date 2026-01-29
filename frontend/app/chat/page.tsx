@@ -1,11 +1,11 @@
 'use client';
 import { useEffect, useState } from 'react';
-import ChatWindow from '@/components/ChatWindow';
-import ChatInput from '@/components/ChatInput';
 import ChatSidebar from '@/components/ChatSidebar';
+import CommandCenter from '@/components/CommandCenter';
+import BrowserView from '@/components/BrowserView';
+import ArtifactsPanel from '@/components/ArtifactsPanel';
 import api from '@/lib/api';
 import { Badge } from '@/components/ui/badge';
-import Link from 'next/link';
 
 interface UsageStats {
     plan: 'free' | 'pro' | 'team';
@@ -28,46 +28,49 @@ export default function ChatPage() {
 
     useEffect(() => {
         fetchUsage();
-        // Poll usage every minute or on focus could be nice, but simple on mount/send is ok.
-        // We can expose a refresh function if needed.
     }, []);
 
-    // Refresh usage when a message is sent (passed to Input? or Context?)
-    // For MVP, just loading on mount is a start, but updating after send is better.
-    // We'll pass fetchUsage to ChatInput via a prop or context? 
-    // Easier: ChatInput triggers a refresh via an event or we just use store. 
-    // Let's keep it simple: Page shows static usage from load. Input handles the locking itself if API errors.
-    // Actually input locking needs this data. 
-
-    // Better pattern: Put usage in chatStore or a new usageStore.
-    // But prompted for "Frontend UX... Header... Input...".
-
     return (
-        <div className="flex h-screen bg-background">
+        <div className="flex h-screen bg-black text-zinc-100 font-sans overflow-hidden">
             <ChatSidebar />
-            <div className="flex-1 flex flex-col min-w-0">
-                <header className="h-14 border-b flex items-center justify-between px-6 sticky top-0 bg-background/80 backdrop-blur z-10">
+
+            <div className="flex-1 flex flex-col min-w-0 bg-black">
+                {/* Header */}
+                <header className="h-12 border-b border-zinc-800 flex items-center justify-between px-4 bg-zinc-950/80 backdrop-blur z-10 shrink-0">
                     <div className="flex items-center gap-3">
-                        <h1 className="font-semibold text-lg tracking-tight">Moltbot</h1>
+                        <span className="relative flex h-2 w-2">
+                            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-emerald-400 opacity-75"></span>
+                            <span className="relative inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
+                        </span>
+                        <h1 className="font-bold text-sm tracking-widest text-zinc-100 uppercase">Moltbot <span className="text-zinc-500">Mission Control</span></h1>
                         {usage && (
-                            <Badge variant={usage.plan === 'free' ? 'secondary' : 'default'} className="uppercase text-xs tracking-wider">
-                                {usage.plan}
+                            <Badge variant="outline" className="text-[10px] border-zinc-800 text-zinc-500 hover:text-white transition-colors bg-zinc-900/50">
+                                {usage.plan.toUpperCase()}
                             </Badge>
                         )}
                     </div>
-                    {usage && (
-                        <div className="text-xs text-muted-foreground flex items-center gap-4">
-                            <span>Usage: {usage.used}/{usage.limit}</span>
-                            {usage.plan === 'free' ? (
-                                <Link href="/pricing" className="text-blue-500 hover:underline">Upgrade</Link>
-                            ) : (
-                                <span>{usage.daysLeft} days left</span>
-                            )}
-                        </div>
-                    )}
                 </header>
-                <ChatWindow />
-                <ChatInput usage={usage} onMessageSent={fetchUsage} />
+
+                {/* 3-Pane Dashboard Layout */}
+                <div className="flex-1 grid grid-cols-12 gap-0 min-h-0">
+
+                    {/* LEFT: Commander (Logs & Input) - 25% */}
+                    <div className="col-span-3 h-full min-h-0 border-r border-zinc-800 bg-zinc-950 relative z-10">
+                        <CommandCenter />
+                    </div>
+
+                    {/* CENTER: Vision (Browser) - 58% (Leaving 17% for right) */}
+                    <div className="col-span-7 h-full min-h-0 bg-zinc-900/10 p-4 flex flex-col relative">
+                        <div className="absolute inset-0 bg-[radial-gradient(ellipse_at_center,_var(--tw-gradient-stops))] from-zinc-900/20 via-black to-black -z-10" />
+                        <BrowserView />
+                    </div>
+
+                    {/* RIGHT: Workspace (Artifacts) - 2/12 = ~16% (Wait, 3+7+2 = 12. Adjust if needed) */}
+                    <div className="col-span-2 h-full min-h-0 border-l border-zinc-800 bg-zinc-950 relative z-10">
+                        <ArtifactsPanel />
+                    </div>
+
+                </div>
             </div>
         </div>
     );
